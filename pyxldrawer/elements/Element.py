@@ -203,4 +203,8 @@ class HeaderElement(Element):
                 col_width = float(self.value_len() + self.padding * 2) / self.width
             except TypeError:
                 return
+        elif self.col_width is None:
+            return
+        else:
+            raise ValueError('incorrect value of col_width.')
         ws.set_column(x, x + self.width - 1, col_width)
