@@ -192,10 +192,10 @@ class HeaderElement(Element):
         else:
             return None
     
-    def draw(self, x, y, ws):
+    def draw(self, x, y, ws, wb):
         """Extension of the draw method of the parent class
         """        
-        Element.draw(self, x, y, ws)
+        Element.draw(self, x, y, ws, wb)
         if isinstance(self.col_width, float):
             col_width = self.col_width
         elif isinstance(self.col_width, str) and self.col_width == 'auto':
