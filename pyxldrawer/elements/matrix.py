@@ -10,6 +10,8 @@ class Matrix(object):
         _matrix (dict): matrix of elements
         _nrow (int): number of rows
         _ncol (int): number of columns
+        _height (int): height
+        _width (int): width
     """
     
     @property
