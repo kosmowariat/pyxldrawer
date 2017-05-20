@@ -49,6 +49,30 @@ class Matrix(object):
     def ncol(self, value):
         raise AttributeError('ncol can not be manually set.')
         
+    @property
+    def height(self):
+        return self._height
+    
+    @height.setter
+    def height(self, value):
+        if not isinstance(value, int):
+            raise TypeError('height has to be an int.')
+        if value < 1:
+            raise ValueError('height has to be positive.')
+        self._height = value
+    
+    @property
+    def width(self):
+        return self._width
+    
+    @width.setter
+    def width(self, value):
+        if not isinstance(value, int):
+            raise TypeError('width has to be an int.')
+        if value < 1:
+            raise ValueError('width has to be positive.')
+        self._width = value
+        
     def __init__(self, values, height = 1, width = 1, style = {}, 
                             comment = None, comment_params = {},
                             col_width = None, padding = 3.0,
@@ -57,8 +81,8 @@ class Matrix(object):
         
         Args:
             values (list/dict): values matrix or list of lists of row values
-            height (int/list/dict): height of cells or height matrix or height list of lists
-            width (int/dict): width of cells or width matrix
+            height (int): height of cells
+            width (int): width of cells
             style (list/dict): style dict or style matrix (dict of style dicst) or list of lists
             comment (list/str/dict): comment text or matrix of comment texts or a list of lists
             comment_params (list/dict): comment params dict or matrix of comment params (dict of dicts) or a list of lists
@@ -82,6 +106,10 @@ class Matrix(object):
         if isinstance(comment_params, list):
             comment_params = self.lists_to_matrix(comment_params)
         self.make_element_matrix(values, height, width, style, comment, comment_params, col_width, padding)
+        self.nrow = self._count_rows()
+        self.ncol = self._count_cols()
+        self.height = self.nrow * height
+        self.width = self.ncol * width
         
         # Add border styles ---
         for elem in self.border(which = 't'):
