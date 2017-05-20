@@ -177,10 +177,12 @@ class HeaderElement(Element):
     def padding(self, value):
         self._padding = float(value)
     
-    def __init__(self, value, height = 1, width = 1, style = {}, col_width = 'auto', padding = 3.0, comment = None):
+    def __init__(self, value, height = 1, width = 1, style = {}, 
+                 comment = None, comment_params = {}, 
+                 col_width = 'auto', padding = 3.0):
         """Constructor method
         """
-        Element.__init__(self, value, height, width, style, comment)
+        Element.__init__(self, value, height, width, style, comment, comment_params)
         self.col_width = col_width
         self.padding = padding
     
