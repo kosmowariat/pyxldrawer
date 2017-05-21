@@ -134,7 +134,7 @@ class Element(object):
             wb (xlsxwriter.workbook.Workbook): workbook the worksheet is in
         """
         self.make_style(wb)
-        if self.x == 1 and self.y == 1:
+        if x == 1 and y == 1:
             ws.write(x, y, self.value, self.style)
         else:
             rng = self.xl_range(x, y)
