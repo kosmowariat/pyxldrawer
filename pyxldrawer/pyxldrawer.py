@@ -3,6 +3,7 @@
 
 import xlsxwriter
 from collections import OrderedDict
+from xlsxwriter.utility import xl_rowcol_to_cell
 
     
 class Drawer(object):
@@ -204,4 +205,12 @@ class Drawer(object):
             n (int): number of steps to fall back. Negative values iterate from the historically first position.
         """
         self.reset(checkpoint = None, x = self.prev_x[-n], y = self.prev_y[-n], change_x = True, change_y = True)
+    
+    def xl_position(self):
+        """Get Drawer's position
+        
+        Returns:
+            str: string with an excel address of the upper-left corner
+        """
+        return xl_rowcol_to_cell(self.y, self.x)
     
