@@ -165,6 +165,14 @@ class HeaderElement(Element):
         
     @col_width.setter
     def col_width(self, value):
+        if isinstance(value, str):
+            if value != 'auto':
+                raise ValueError("col_width has to be float, None or 'auto'.")
+        else:
+            try:
+                value = float(value)
+            except (TypeError, ValueError):
+                raise TypeError("col_width has to be float, None or 'auto'.")
         self._col_width = float(value)
         
     @property
