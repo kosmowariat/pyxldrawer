@@ -95,7 +95,7 @@ class Element(object):
             wb (xlsxwriter.workbook.Workbook): workbook to register a style in
         """
         if isinstance(self.style, dict):
-            wb.add_format(self.style)
+            self.style = wb.add_format(self.style)
     
     def xl_upleft(self, x, y):
         """Get upper-left corner coordinates of the Element in the standard excel notation
