@@ -134,8 +134,8 @@ class Element(object):
             wb (xlsxwriter.workbook.Workbook): workbook the worksheet is in
         """
         self.make_style(wb)
-        if x == 1 and y == 1:
-            ws.write(x, y, self.value, self.style)
+        if self.width == 1 and self.height == 1:
+            ws.write(y, x, self.value, self.style)
         else:
             rng = self.xl_range(x, y)
             ws.merge_range(rng, self.value, self.style)
@@ -168,12 +168,14 @@ class HeaderElement(Element):
         if isinstance(value, str):
             if value != 'auto':
                 raise ValueError("col_width has to be float, None or 'auto'.")
+        elif value is None:
+            pass
         else:
             try:
                 value = float(value)
             except (TypeError, ValueError):
                 raise TypeError("col_width has to be float, None or 'auto'.")
-        self._col_width = float(value)
+        self._col_width = value
         
     @property
     def padding(self):
@@ -187,7 +189,7 @@ class HeaderElement(Element):
     
     def __init__(self, value, height = 1, width = 1, style = {}, 
                  comment = None, comment_params = {}, 
-                 col_width = 'auto', padding = 3.0):
+                 col_width = 'auto', padding = 1.0):
         """Constructor method
         """
         Element.__init__(self, value, height, width, style, comment, comment_params)

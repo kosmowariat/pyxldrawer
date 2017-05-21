@@ -25,8 +25,8 @@ class Matrix(object):
         if not isinstance(value, dict):
             raise TypeError('matrix has to be a dict.')
         self._matrix = value
-        self.nrow = self._count_rows()
-        self.ncol = self._count_cols()
+        self._nrow = self._count_rows()
+        self._ncol = self._count_cols()
         
     
     @property
@@ -106,8 +106,8 @@ class Matrix(object):
         if isinstance(comment_params, list):
             comment_params = self.lists_to_matrix(comment_params)
         self.make_element_matrix(values, height, width, style, comment, comment_params, col_width, padding)
-        self.nrow = self._count_rows()
-        self.ncol = self._count_cols()
+        self._nrow = self._count_rows()
+        self._ncol = self._count_cols()
         self.height = self.nrow * height
         self.width = self.ncol * width
         
@@ -131,9 +131,10 @@ class Matrix(object):
         Returns:
             dict: merge styling dictionary
         """
+        merged_style = style.copy()
         for key, value in additional_style.items():
-            style[key] = value
-        return style
+            merged_style[key] = value
+        return merged_style
         
     def _count_rows(self, matrix = None):
         if matrix is None:
@@ -194,12 +195,12 @@ class Matrix(object):
             n = 0 if which == 't' else self.nrow - 1
             m0 = 0 if corner1 else 1
             m1 = self.ncol if corner2 else self.ncol - 1
-            return [ self.matrix[(n, x)] for x in range(m0, m1) ]
+            return [ self.get(n, x) for x in range(m0, m1) ]
         elif which == 'r' or which == 'l':
             n0 = 0 if corner1 else 1
             n1 = self.nrow if corner2 else self.nrow - 1
-            m = 0 if which == 'l' else self.nrow - 1
-            return [ self.matrix(x, m) for x in range(n0, n1)]
+            m = 0 if which == 'l' else self.ncol - 1
+            return [ self.get(x, m) for x in range(n0, n1)]
         else:
             raise ValueError("which has to be either 't', 'r', 'b' or 'l'.")
     
@@ -277,9 +278,9 @@ class Matrix(object):
                     value = values[(i, j)],
                     height = height[(i, j)] if isinstance(height, dict) else height,
                     width = width[(i, j)] if isinstance(width, dict) else width,
-                    style = style[(i, j)] if all([ isinstance(x, dict) for x in style.values() ]) else style,
-                    comment = comment[(i, j)] if isinstance(comment, dict) else comment,
-                    comment_params = comment_params[(i, j)] if all([ isinstance(x, dict) for x in comment_params.values() ]) else comment_params,
+                    style = style[(i, j)] if len(style) > 0 and all([ isinstance(x, dict) for x in style.values() ]) else style,
+                    comment = comment[(i, j)] if comment is not None and len(comment) > 0 and isinstance(comment, dict) else comment,
+                    comment_params = comment_params[(i, j)] if len(comment_params) > 0 and all([ isinstance(x, dict) for x in comment_params.values() ]) else comment_params,
                     col_width = col_width,
                     padding = padding
                 )
@@ -295,6 +296,7 @@ class Matrix(object):
             ws (xlsxwriter.worksheet.Worksheet): worksheet to draw in
             wb (xlsxwriter.workbook.Workbook): workbook the worksheet is in
         """
+        x0 = x
         for i in range(self.nrow):
             height = 1
             for j in range(self.ncol):
@@ -303,5 +305,6 @@ class Matrix(object):
                 x += elem.width
                 if elem.height > height:
                     height = elem.height
-            y += height
+            x = x0
+            y += elem.height
             

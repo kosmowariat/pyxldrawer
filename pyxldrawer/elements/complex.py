@@ -11,7 +11,7 @@ class TreeElement(object):
         height (int): total height of the element
         width (int): total width of the element
         parent (Element): object inheriting from the Element class
-        children (Matrix): object inheriting from the Matrix class; must have nrow == 1.
+        children (LineElement): object inheriting from the LineElement class
     """
     
     @property
@@ -44,8 +44,8 @@ class TreeElement(object):
     
     @parent.setter
     def parent(self, value):
-        if not issubclass(value, Element):
-            raise TypeError('parent has to inherit from Element class.')
+#        if not issubclass(type(value), Element):
+#            raise TypeError('parent has to inherit from Element class.')
         self._parent = value
     
     @property
@@ -54,10 +54,10 @@ class TreeElement(object):
     
     @children.setter
     def children(self, value):
-        if not issubclass(value, Matrix):
-            raise TypeError('children has to inherit from Matrix class.')
-        if value.nrow != 1:
-            raise ValueError('children has to have only one row.')
+#        if not issubclass(type(value), Matrix):
+#            raise TypeError('children has to inherit from Matrix class.')
+#        if value.nrow != 1:
+#            raise ValueError('children has to have only one row.')
         self._children = value
     
     def __init__(self, parent, children):
@@ -165,8 +165,8 @@ class LineElement(object):
         if self.vertical:
             for elem in self.elements:
                 elem.draw(x, y, ws, wb)
-                x += elem.height
+                y += elem.height
         else:
             for elem in self.elements:
                 elem.draw(x, y, ws, wb)
-                y += elem.width
+                x += elem.width
