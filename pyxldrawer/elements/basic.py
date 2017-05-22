@@ -2,18 +2,29 @@
 
 import xlsxwriter
 from xlsxwriter.utility import xl_rowcol_to_cell
+from pandas import isnull
 
 class Element(object):
     """Implementation of an atomic report element
     
     Attributes:
         value (any): cell value; may be of any atomic type
-        _height (int): height as a number of cells (rows); non-negative
-        _width (int): width as a number of cells (columns); non-negative
-        _style (xlsxwriter.format.Format): Element's style
-        _comment (str): comment text; defaults to none
-        _comment_params (dict): comment params (see xlsxwriters docs); defaults to {}
+        height (int): height as a number of cells (rows); non-negative
+        width (int): width as a number of cells (columns); non-negative
+        style (xlsxwriter.format.Format): Element's style
+        comment (str): comment text; defaults to none
+        comment_params (dict): comment params (see xlsxwriters docs); defaults to {}
     """
+    
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value):
+        if isnull(value):
+            value = ''
+        self._value = value
     
     @property
     def height(self):
