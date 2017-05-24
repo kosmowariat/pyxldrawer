@@ -124,12 +124,12 @@ class Element(object):
         Returns:
             str: string with an excel address of the upper-left corner
         """
-        return xl_rowcol_to_cell(y, x)
+        return xl_rowcol_to_cell(x, y)
     
     def xl_loright(self, x, y):
         """Get lower-right corner cooridnates of the Element in the standard excel notation
         """
-        return xl_rowcol_to_cell(y + self.height - 1, x + self.width - 1)
+        return xl_rowcol_to_cell(x + self.height - 1, y + self.width - 1)
     
     def xl_range(self, x, y):
         """Get range covered with the Element in the standard excel notation
@@ -152,7 +152,7 @@ class Element(object):
         """
         self.make_style(wb)
         if self.width == 1 and self.height == 1:
-            ws.write(y, x, self.value, self.style)
+            ws.write(x, y, self.value, self.style)
         else:
             rng = self.xl_range(x, y)
             ws.merge_range(rng, self.value, self.style)
@@ -171,9 +171,11 @@ class HeaderElement(Element):
     If it is flaot then fixed width is set.
     
     Attributes:
-        _col_width (float/str/None): column width
-        _padding (float): padding addedd to both sides in auto-resizing
+        col_width (float/str/None): column width
+        padding (float): padding addedd to both sides in auto-resizing
     """
+    
+    ###########################################################################
     
     @property
     def col_width(self):
@@ -205,6 +207,8 @@ class HeaderElement(Element):
     def padding(self, value):
         self._padding = float(value)
     
+    ###########################################################################
+    
     def __init__(self, value, height = 1, width = 1, style = {}, 
                  comment = None, comment_params = {}, 
                  col_width = 'auto', padding = 1.0):
@@ -214,7 +218,9 @@ class HeaderElement(Element):
         self.col_width = col_width
         self.padding = padding
     
-    def value_len(self):
+    def _value_len(self):
+        """Computes length of the element's value
+        """
         if self.value is not None:
             return len(str(self.value))
         else:
@@ -228,14 +234,14 @@ class HeaderElement(Element):
             col_width = self.col_width
         elif isinstance(self.col_width, str) and self.col_width == 'auto':
             try:
-                col_width = float(self.value_len() + self.padding * 2) / self.width
+                col_width = float(self._value_len() + self.padding * 2) / self.width
             except TypeError:
                 return
         elif self.col_width is None:
             return
         else:
             raise ValueError('incorrect value of col_width.')
-        ws.set_column(x, x + self.width - 1, col_width)
+        ws.set_column(y, y + self.width - 1, col_width)
 
 # -----------------------------------------------------------------------------
 
@@ -246,12 +252,14 @@ class Matrix(object):
     It provides easy means for defining borders of areas in an excel worksheet.
     
     Attributes:
-        _matrix (dict): matrix of elements
-        _nrow (int): number of rows
-        _ncol (int): number of columns
-        _height (int): height
-        _width (int): width
+        matrix (dict): matrix of elements
+        nrow (int): number of rows
+        ncol (int): number of columns
+        height (int): height
+        width (int): width
     """
+    
+    ###########################################################################
     
     @property
     def matrix(self):
@@ -311,10 +319,12 @@ class Matrix(object):
         if value < 1:
             raise ValueError('width has to be positive.')
         self._width = value
+    
+    ###########################################################################
         
     def __init__(self, values, height = 1, width = 1, style = {}, 
                             comment = None, comment_params = {},
-                            col_width = None, padding = 3.0,
+                            col_width = None, padding = 1.0,
                             top = {}, right ={}, bottom = {}, left = {}):
         """Constructor method
         
@@ -452,7 +462,8 @@ class Matrix(object):
         Returns:
             Element: corner element
         """
-        vals = {1: 'topleft', 2: 'topright', 3: 'bottomright', 4: 'bottomleft'}
+        vals = {1: 'topright', 2: 'bottomright', 
+                3: 'bottomleft', 4: 'topleft', }
         if isinstance(which, str):
             pass
         elif isinstance(which, int):
@@ -468,7 +479,7 @@ class Matrix(object):
         elif which == 'bottomleft':
             return self.matrix[(self.nrow - 1, 0)]
         else:
-            raise ValueError("which has to be either 1/'topleft', 2/'topright', 3/'bottomright' or 4/'bottomleft'")
+            raise ValueError("which has to be either 1/'topright', 2/'bottomright', 3/'bottomleft' or 4/'topleft'")
         
     def lists_to_matrix(self, L):
         """Converts a list of lists to a matrix
@@ -530,22 +541,22 @@ class Matrix(object):
         """Draw Matrix object in a worksheet
         
         Args:
-            x (int): x-coordinate
-            y (int): y-coordinate
+            x (int): x-coordinate (rows)
+            y (int): y-coordinate (columns)
             ws (xlsxwriter.worksheet.Worksheet): worksheet to draw in
             wb (xlsxwriter.workbook.Workbook): workbook the worksheet is in
         """
         x0 = x
         for i in range(self.nrow):
-            height = 1
+            #height = 1
             for j in range(self.ncol):
                 elem = self.get(i, j)
                 elem.draw(x, y, ws, wb)
-                x += elem.width
-                if elem.height > height:
-                    height = elem.height
+                x += elem.height
+#                if elem.height > height:
+#                    height = elem.height
             x = x0
-            y += elem.height
+            y += elem.width
             
 # -----------------------------------------------------------------------------
 
