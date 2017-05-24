@@ -546,17 +546,17 @@ class Matrix(object):
             ws (xlsxwriter.worksheet.Worksheet): worksheet to draw in
             wb (xlsxwriter.workbook.Workbook): workbook the worksheet is in
         """
-        x0 = x
+        y0 = y
         for i in range(self.nrow):
-            #height = 1
+            height = 1
             for j in range(self.ncol):
                 elem = self.get(i, j)
                 elem.draw(x, y, ws, wb)
-                x += elem.height
-#                if elem.height > height:
-#                    height = elem.height
-            x = x0
-            y += elem.width
+                y += elem.width
+                if elem.height > height:
+                    height = elem.height
+            y = y0
+            x += height
             
 # -----------------------------------------------------------------------------
 
@@ -644,7 +644,7 @@ class TreeElement(object):
             wb (xlsxwriter.workbook.Workbook): workbook the worksheet is in
         """
         self.parent.draw(x, y, ws, wb)
-        self.children.draw(x, y + self.parent.height, ws, wb)
+        self.children.draw(x + self.parent.height, y, ws, wb)
 
 # -----------------------------------------------------------------------------
 
@@ -726,10 +726,10 @@ class LineElement(object):
         if self.vertical:
             for elem in self.elements:
                 elem.draw(x, y, ws, wb)
-                y += elem.height
+                x += elem.height
         else:
             for elem in self.elements:
                 elem.draw(x, y, ws, wb)
-                x += elem.width
+                y += elem.width
 
 # -----------------------------------------------------------------------------
