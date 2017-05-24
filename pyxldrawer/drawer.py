@@ -15,11 +15,14 @@ class Drawer(object):
     and it can be fed with drawing elements which it in turn draws (according to their attributes)
     in a place it is currently located in.
     
+    Drawers position are defined in matrix-like terms.
+    X is rows (vertical dimension) and Y is column (horizontal dimension).
+    
     Attributes:
-        _x (int): current x-coordinate
-        _y (int): current y-coordinate
-        _ws (xlsxwriter.worksheet.Workshet): worksheet to draw on
-        _wb (xlsxwriter.workbook.Workbook): workbook the worksheet in in
+        x (int): current x-coordinate (rows)
+        y (int): current y-coordinate (columns)
+        ws (xlsxwriter.worksheet.Workshet): worksheet to draw on
+        wb (xlsxwriter.workbook.Workbook): workbook the worksheet in in
         height (int): height of the last drawed object
         width (int): width of the last drawed object
         prev_x (list): list of previous x-coordinates
@@ -139,31 +142,31 @@ class Drawer(object):
             self.x += x
             self.y += y
     
-    def move_horizontal(self, x = None, back = False):
+    def move_horizontal(self, y = None, back = False):
         """Move drawer horizontally
         
         This method is useful, since it defaults to the last's object width.
         
         Args:
-            x (int): number of cells to move; defaults to the width of the last drawed object
+            y (int): number of cells to move; defaults to the width of the last drawed object
             back (bool): whether to move forward or backward
         """
-        if x is None:
-            x = self.width
-        self.move(x, 0, back = back)
+        if y is None:
+            y = self.width
+        self.move(0, y, back = back)
     
-    def move_vertical(self, y = None, back = False):
+    def move_vertical(self, x = None, back = False):
         """Move drawer vertically
         
         Defaults to the last object's height.
         
         Args:
-            y (int): number of cells to move; default to the height of the last drawed object
+            x (int): number of cells to move; default to the height of the last drawed object
             back (bool): whether to move forward or backward
         """
-        if y is None:
-            y = self.height
-        self.move(0, y, back = back)
+        if x is None:
+            x = self.height
+        self.move(x, 0, back = back)
     
     def add_checkpoint(self, name):
         """Adds current position as a checkpoint
@@ -216,6 +219,6 @@ class Drawer(object):
         Returns:
             str: string with an excel address of the upper-left corner
         """
-        return xl_rowcol_to_cell(self.y, self.x)
+        return xl_rowcol_to_cell(self.x, self.y)
     
 # -----------------------------------------------------------------------------
