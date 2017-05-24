@@ -612,10 +612,10 @@ class TreeElement(object):
     
     @children.setter
     def children(self, value):
-        if not issubclass(type(value), Matrix):
-            raise TypeError('children has to inherit from Matrix class.')
-        if value.nrow != 1:
-            raise ValueError('children has to have only one row.')
+#        if not issubclass(type(value), Matrix):
+#            raise TypeError('children has to inherit from Matrix class.')
+#        if value.nrow != 1:
+#            raise ValueError('children has to have only one row.')
         self._children = value
     
     ###########################################################################
