@@ -1,6 +1,7 @@
 """The main drawing controller class"""
 
 import xlsxwriter
+import re
 from collections import OrderedDict
 from xlsxwriter.utility import xl_rowcol_to_cell
 
@@ -213,12 +214,32 @@ class Drawer(object):
         """
         self.reset(checkpoint = None, x = self.prev_x[-n], y = self.prev_y[-n], change_x = True, change_y = True)
     
-    def xl_position(self):
+    def xl_position(self, x = 0, y = 0):
         """Get Drawer's position
+        
+        Args:
+            x (int): number of rows to shift when determining position
+            y (int): number of columns to shift when determinin position
         
         Returns:
             str: string with an excel address of the upper-left corner
         """
         return xl_rowcol_to_cell(self.x, self.y)
+    
+    def xl_column(self, y = 0):
+        """Get Drawer's current column in the excel notation
+        
+        Args:
+            y (int): number of columns to shift when determining position
+        """
+        return re.sub('[0-9]', '', self.xl_position(y = y))
+    
+    def xl_row(self, x = 0):
+        """Get Drawer's current row in the excel notation
+        
+        Args:
+            x (int): number of rows to shift when determining position
+        """
+        return re.sub('[^0-9]', '', self.xl_position(x = x))
     
 # -----------------------------------------------------------------------------
