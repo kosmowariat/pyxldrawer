@@ -1,15 +1,15 @@
-"""Easy programmatic generation of .xlsx report (based on xlsxwriter).
-"""
+"""The main drawing controller class"""
 
 import xlsxwriter
 from collections import OrderedDict
 from xlsxwriter.utility import xl_rowcol_to_cell
 
+# -----------------------------------------------------------------------------
     
 class Drawer(object):
     """Elements drawer
     
-    This is an implementation of the drawer object.
+    This is an implementation of the drawing class.
     Drawer object is used for drawing actual drawing element in a .xlsx report.
     Its mechanics are quite simple: Drawer has its position in a standard cartesiax xy coordinate system
     and it can be fed with drawing elements which it in turn draws (according to their attributes)
@@ -26,6 +26,8 @@ class Drawer(object):
         prev_y (list): list of previous y-coordinates
         checkpoints (OrderedDict): set of checkpoints
     """
+    
+    ###########################################################################
     
     @property
     def x(self):
@@ -78,6 +80,8 @@ class Drawer(object):
         if not isinstance(value, xlsxwriter.workbook.Workbook):
             raise TypeError('wb has to be an instance of xlsxwriter.workbook.Workbook.')
         self._wb = value
+    
+    ###########################################################################
     
     def __init__(self, ws, wb, x = 0, y = 0):
         """Constructor method
@@ -214,3 +218,4 @@ class Drawer(object):
         """
         return xl_rowcol_to_cell(self.y, self.x)
     
+# -----------------------------------------------------------------------------
