@@ -224,7 +224,7 @@ class Drawer(object):
         Returns:
             str: string with an excel address of the upper-left corner
         """
-        return xl_rowcol_to_cell(self.x, self.y)
+        return xl_rowcol_to_cell(self.x + x, self.y + y)
     
     def xl_column(self, y = 0):
         """Get Drawer's current column in the excel notation
