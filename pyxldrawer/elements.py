@@ -3,8 +3,10 @@
 import xlsxwriter
 from xlsxwriter.utility import xl_rowcol_to_cell
 from pandas import isnull
+import sys, yaml
+from collections import OrderedDict
 
-# -----------------------------------------------------------------------------
+###############################################################################
 
 class Element(object):
     """Implementation of an atomic report element
@@ -18,7 +20,7 @@ class Element(object):
         comment_params (dict): comment params (see xlsxwriters docs); defaults to {}
     """
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     @property
     def value(self):
@@ -93,7 +95,7 @@ class Element(object):
             raise TypeError('comment_params has to be a dict (it may be emtpy).')
         self._comment_params = value
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     def __init__(self, value, height = 1, width = 1, style = {}, comment = None, comment_params = {}):
         """Constructor method
@@ -160,7 +162,7 @@ class Element(object):
             addr = self.xl_upleft(x, y)
             ws.write_comment(addr, self.comment, self.comment_params)
 
-# -----------------------------------------------------------------------------
+###############################################################################
 
 class HeaderElement(Element):
     """Header element class
@@ -175,7 +177,7 @@ class HeaderElement(Element):
         padding (float): padding addedd to both sides in auto-resizing
     """
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     @property
     def col_width(self):
@@ -207,7 +209,7 @@ class HeaderElement(Element):
     def padding(self, value):
         self._padding = float(value)
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     def __init__(self, value, height = 1, width = 1, style = {}, 
                  comment = None, comment_params = {}, 
@@ -243,7 +245,7 @@ class HeaderElement(Element):
             raise ValueError('incorrect value of col_width.')
         ws.set_column(y, y + self.width - 1, col_width)
 
-# -----------------------------------------------------------------------------
+###############################################################################
 
 class Matrix(object):
     """Matrix of elements
@@ -259,7 +261,7 @@ class Matrix(object):
         width (int): width
     """
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     @property
     def matrix(self):
@@ -320,7 +322,7 @@ class Matrix(object):
             raise ValueError('width has to be positive.')
         self._width = value
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
         
     def __init__(self, values, height = 1, width = 1, style = {}, 
                             comment = None, comment_params = {},
@@ -558,7 +560,7 @@ class Matrix(object):
             y = y0
             x += height
             
-# -----------------------------------------------------------------------------
+###############################################################################
 
 class TreeElement(object):
     """Element with a row of sub elements
@@ -570,7 +572,7 @@ class TreeElement(object):
         children (LineElement): object inheriting from the LineElement class
     """
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     @property
     def width(self):
@@ -618,7 +620,7 @@ class TreeElement(object):
 #            raise ValueError('children has to have only one row.')
         self._children = value
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     def __init__(self, parent, children):
         """Constructor method
@@ -646,7 +648,7 @@ class TreeElement(object):
         self.parent.draw(x, y, ws, wb)
         self.children.draw(x + self.parent.height, y, ws, wb)
 
-# -----------------------------------------------------------------------------
+###############################################################################
 
 class LineElement(object):
     """Horizontal or vertical line of elements
@@ -658,7 +660,7 @@ class LineElement(object):
         elements (list): list of objects equiped with the 'draw' method
     """
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     @property
     def height(self):
@@ -700,7 +702,7 @@ class LineElement(object):
             raise TypeError('elements has to be a list.')
         self._elements = value
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     def __init__(self, elements, vertical = False):
         """Constructor method
@@ -732,4 +734,235 @@ class LineElement(object):
                 elem.draw(x, y, ws, wb)
                 y += elem.width
 
-# -----------------------------------------------------------------------------
+###############################################################################
+
+class Dictionary(object):
+    """Visual/tabular representaion of a key => value set
+    
+    This class implements a layout of fields in a report,
+    in which there is one column (a key column)
+    separated from a second column by a horizontal space of a given width
+    that presents key (titles) and the second column presents content (values)
+    for given keys. Useful form making into/definitions pages for various reports.
+    
+    Attributes:
+        structure (OrderedDict/str): definition of the structure of a Dictionary (key => value) or a path to the .yaml config file
+        hspace (int): width of the horizontal space between key column and value column
+        vspace (int): default vertical spacing between fields
+        text_params (dict): key and values to be interpolated in text
+        field_params (dict): default set of params passed to the HeaderElement constructor (field column) as **kwargs
+        content_params (dict): default set of params passed to the HeaderElement constructor (content column) as **kwargs
+    """
+    
+    # -------------------------------------------------------------------------
+    
+    @property
+    def structure(self):
+        return self._structure
+    
+    @structure.setter
+    def structure(self, value):
+        if not isinstance(value, (OrderedDict, str)):
+            raise TypeError('structure has to be an OrderedDict.')
+        if isinstance(value, str):
+            self._structure = self.load_config(value)
+        else:
+            self._structure = value
+    
+    @property
+    def hspace(self):
+        return self._hspace
+    
+    @hspace.setter
+    def hspace(self, value):
+        if not isinstance(value, int):
+            raise TypeError('hspace has to be an int.')
+        self._hspace = value
+    
+    @property
+    def vspace(self):
+        return self._vspace
+    
+    @vspace.setter
+    def vspace(self, value):
+        if not isinstance(value, int):
+            raise TypeError('vspace has to be an int.')
+        self._vspace = value
+    
+    @property
+    def text_params(self):
+        return self._text_params
+    
+    @text_params.setter
+    def text_params(self, value):
+        if not isinstance(value, dict):
+            raise TypeError('text_params has to be a dict.')
+        self._text_params = value
+    
+    @property
+    def field_params(self):
+        return self._field_params
+    
+    @field_params.setter
+    def field_params(self, value):
+        if not isinstance(value, dict):
+            raise TypeError('field_params has to be a dict.')
+        self._field_params = value
+    
+    @property
+    def content_params(self):
+        return self._content_params
+    
+    @content_params.setter
+    def content_params(self, value):
+        if not isinstance(value, dict):
+            raise TypeError('content_params has to be a dict.')
+        self._content_params = value
+    
+    @property
+    def height(self):
+        return self._height
+    
+    @height.setter
+    def height(self, value):
+        if not isinstance(value, int):
+            raise TypeError('height has to be a positive int.')
+        elif value < 1:
+            raise ValueError('height has to be a positive int.')
+        self._height = value
+    
+    @property
+    def width(self):
+        return self._width
+    
+    @width.setter
+    def width(self, value):
+        if not isinstance(value, int):
+            raise TypeError('width has to be a positive int.')
+        elif value < 1:
+            raise ValueError('width has to be a positive int.')
+        self._width = value
+    
+    # -------------------------------------------------------------------------
+    
+    def __init__(self, structure, hspace = 1, vspace = 0, text_params = {},
+                 field_params = {}, content_params = {}):
+        """Constructor method
+        """
+        self.structure = structure
+        self.hspace = hspace
+        self.vspace = vspace
+        self.text_params = text_params
+        self.field_params = field_params
+        if content_params.get('col_width') is None:
+            content_params['col_width'] = None
+        self.content_params = content_params
+        
+        # Determine height and width ---
+        height = 0
+        width = 0
+        for field, content in self.structure.items():
+            fh = field_params.get('height', 1)
+            fw = field_params.get('width', 1)
+            cw = content_params.get('width', 1)
+            w = fw + cw + self.vspace
+            if w > width:
+                width = w
+            vals = content['content']
+            if not isinstance(vals, list):
+                vals = [vals]
+            ch = len(vals) * content_params.get('height', 1)
+            if fh > ch:
+                height += fh
+            else:
+                height += ch
+        self.height = height
+        self.width = width
+    
+    def interpolate_string(self, s):
+        """Interpolate a string using text_params
+        
+        Args:
+            s (str): a string
+        """
+        return s.format(f = self.text_params)
+    
+    def load_config(self, path = None):
+        """Loads config from a config.yaml file
+    
+        Args:
+            path (str): path to a config file; may be None, then Collector object's default is used
+            
+        Returns:
+            OrderedDict: config parsed to a dictionary
+        """        
+        if path is None:
+            path = self.config_path
+    
+        def ordered_load(stream, Loader = yaml.Loader, object_pairs_hook = OrderedDict):
+            class OrderedLoader(Loader):
+                pass
+            def construct_mapping(loader, node):
+                loader.flatten_mapping(node)
+                return object_pairs_hook(loader.construct_pairs(node))
+            OrderedLoader.add_constructor(
+                yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+                construct_mapping
+            )
+            return yaml.load(stream, OrderedLoader)    
+        cnf = open(path, 'r')
+        try:
+            config = ordered_load(cnf)
+        except yaml.YAMLError as exc:
+            sys.exit(exc)
+        finally:
+            cnf.close()
+        return config   
+
+    def _merge_styles(self, style, additional_style):
+        """Add and/or change styling dict
+        
+        Args:
+            style (dict): original style dictionary
+            additional_style (dict): dict with additional styling rules
+        
+        Returns:
+            dict: merge styling dictionary
+        """
+        merged_style = style.copy()
+        for key, value in additional_style.items():
+            merged_style[key] = value
+        return merged_style
+
+    def draw(self, x, y, ws, wb):
+        """Draw Dictionary in a worksheet
+        
+        Args:
+            x (int): x-coordinate (rows)
+            y (int): y-coordinate (columns)
+            ws (xlsxwriter.worksheet.Worksheet): worksheet to draw in
+            wb (xlsxwriter.workbook.Workbook): workbook to draw in
+        """
+        y0 = y
+        for field, data in self.structure.items():
+            field_params = self._merge_styles(self.field_params, data.get('field_params', {}))
+            content_params = self._merge_styles(self.content_params, data.get('content_params', {}))
+            field_value = self.interpolate_string(field)
+            vspace = data.get('vspace', self.vspace)
+            Field = HeaderElement(field_value, **field_params)
+            Field.draw(x, y, ws, wb)
+            content = data['content']
+            if not isinstance(content, list):
+                content = [content]
+            elif content is None:
+                content = ['']
+            for value in content:
+                if isinstance(value, str):
+                    value = self.interpolate_string(value)
+                Content = HeaderElement(value, **content_params)
+                Content.draw(x, y  + Field.width + self.hspace, ws, wb)
+                x += Content.height
+            y = y0
+            x += vspace
+
+###############################################################################

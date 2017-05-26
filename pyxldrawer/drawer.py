@@ -5,7 +5,7 @@ import re
 from collections import OrderedDict
 from xlsxwriter.utility import xl_rowcol_to_cell
 
-# -----------------------------------------------------------------------------
+###############################################################################
     
 class Drawer(object):
     """Elements drawer
@@ -31,7 +31,7 @@ class Drawer(object):
         checkpoints (OrderedDict): set of checkpoints
     """
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     @property
     def x(self):
@@ -85,7 +85,7 @@ class Drawer(object):
             raise TypeError('wb has to be an instance of xlsxwriter.workbook.Workbook.')
         self._wb = value
     
-    ###########################################################################
+    # -------------------------------------------------------------------------
     
     def __init__(self, ws, wb, x = 0, y = 0):
         """Constructor method
@@ -242,4 +242,4 @@ class Drawer(object):
         """
         return re.sub('[^0-9]', '', self.xl_position(x = x))
     
-# -----------------------------------------------------------------------------
+###############################################################################
