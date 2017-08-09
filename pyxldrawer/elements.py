@@ -3,7 +3,7 @@
 import xlsxwriter
 from xlsxwriter.utility import xl_rowcol_to_cell
 from pandas import isnull
-import sys, yaml
+import sys, yaml, re
 from collections import OrderedDict
 
 ###############################################################################
@@ -930,7 +930,10 @@ class Dictionary(object):
                 content = ['']
             for value in content:
                 if isinstance(value, str):
-                    value = self.interpolate_string(value)
+                    if re.match('^@@', value):
+                        value = self.text_params[re.sub('^@@', '', value)]
+                    else:
+                        value = self.interpolate_string(value)
                 Content = HeaderElement(value, **content_params)
                 Content.draw(x, y  + Field.width + self.hspace, ws, wb)
                 x += Content.height
