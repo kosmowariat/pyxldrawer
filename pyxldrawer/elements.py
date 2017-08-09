@@ -25,7 +25,6 @@ class Element(object):
     @property
     def value(self):
         return self._value
-    
     @value.setter
     def value(self, value):
         if isnull(value):
@@ -37,7 +36,6 @@ class Element(object):
         """Element's height
         """
         return self._height
-    
     @height.setter
     def height(self, value):
         if not isinstance(value, int):
@@ -51,7 +49,6 @@ class Element(object):
         """Element's width
         """
         return self._width
-    
     @width.setter
     def width(self, value):
         if not isinstance(value, int):
@@ -65,7 +62,6 @@ class Element(object):
         """Element's style
         """
         return self._style
-    
     @style.setter
     def style(self, value):
         if isinstance(value, (dict, xlsxwriter.format.Format)):
@@ -78,7 +74,6 @@ class Element(object):
         """Comment text
         """
         return self._comment
-    
     @comment.setter
     def comment(self, value):
         self._comment = value
@@ -88,7 +83,6 @@ class Element(object):
         """Comment params dictionary
         """
         return self._comment_params
-    
     @comment_params.setter
     def comment_params(self, value):
         if not isinstance(value, dict):
@@ -153,14 +147,19 @@ class Element(object):
             wb (xlsxwriter.workbook.Workbook): workbook the worksheet is in
         """
         self.make_style(wb)
-        if self.width == 1 and self.height == 1:
-            ws.write(x, y, self.value, self.style)
+        if isinstance(self.value, (list, tuple)):
+            if self.height > 1 or self.width > 1:
+                ws.merge_range(self.xl_range(x, y), '', self.style)
+            ws.write_rich_string(self.xl_upleft(x, y), *self.value, self.style)
         else:
-            rng = self.xl_range(x, y)
-            ws.merge_range(rng, self.value, self.style)
-        if self.comment is not None:
-            addr = self.xl_upleft(x, y)
-            ws.write_comment(addr, self.comment, self.comment_params)
+            if self.width == 1 and self.height == 1:
+                ws.write(x, y, self.value, self.style)
+            else:
+                rng = self.xl_range(x, y)
+                ws.merge_range(rng, self.value, self.style)
+            if self.comment is not None:
+                addr = self.xl_upleft(x, y)
+                ws.write_comment(addr, self.comment, self.comment_params)
 
 ###############################################################################
 
@@ -184,7 +183,6 @@ class HeaderElement(Element):
         """Column width given as a float
         """
         return self._col_width
-        
     @col_width.setter
     def col_width(self, value):
         if isinstance(value, str):
@@ -204,7 +202,6 @@ class HeaderElement(Element):
         """Padding given as a float
         """
         return self._padding
-    
     @padding.setter
     def padding(self, value):
         self._padding = float(value)
@@ -268,7 +265,6 @@ class Matrix(object):
         """Matrix of elements
         """
         return self._matrix
-    
     @matrix.setter
     def matrix(self, value):
         if not isinstance(value, dict):
@@ -283,7 +279,6 @@ class Matrix(object):
         """Number of rows
         """
         return self._nrow
-    
     @nrow.setter
     def nrow(self, value):
         raise AttributeError('nrow can not be manually set.')
@@ -293,7 +288,6 @@ class Matrix(object):
         """Number of columns
         """
         return self._ncol
-    
     @ncol.setter
     def ncol(self, value):
         raise AttributeError('ncol can not be manually set.')
@@ -301,7 +295,6 @@ class Matrix(object):
     @property
     def height(self):
         return self._height
-    
     @height.setter
     def height(self, value):
         if not isinstance(value, int):
@@ -313,7 +306,6 @@ class Matrix(object):
     @property
     def width(self):
         return self._width
-    
     @width.setter
     def width(self, value):
         if not isinstance(value, int):
@@ -577,7 +569,6 @@ class TreeElement(object):
     @property
     def width(self):
         return self._width
-    
     @width.setter
     def width(self, value):
         if not isinstance(value, int):
@@ -589,7 +580,6 @@ class TreeElement(object):
     @property
     def height(self):
         return self._height
-    
     @height.setter
     def height(self, value):
         if not isinstance(value, int):
@@ -601,7 +591,6 @@ class TreeElement(object):
     @property
     def parent(self):
         return self._parent
-    
     @parent.setter
     def parent(self, value):
         if not issubclass(type(value), Element):
@@ -611,13 +600,8 @@ class TreeElement(object):
     @property
     def children(self):
         return self._children
-    
     @children.setter
     def children(self, value):
-#        if not issubclass(type(value), Matrix):
-#            raise TypeError('children has to inherit from Matrix class.')
-#        if value.nrow != 1:
-#            raise ValueError('children has to have only one row.')
         self._children = value
     
     # -------------------------------------------------------------------------
@@ -665,7 +649,6 @@ class LineElement(object):
     @property
     def height(self):
         return self._height
-    
     @height.setter
     def height(self, value):
         if not isinstance(value, int) or value < 1:
@@ -675,7 +658,6 @@ class LineElement(object):
     @property
     def width(self):
         return self._width
-    
     @width.setter
     def width(self, value):
         if not isinstance(value, int) or value < 1:
@@ -685,7 +667,6 @@ class LineElement(object):
     @property
     def vertical(self):
         return self._vertical
-    
     @vertical.setter
     def vertical(self, value):
         if not isinstance(value, bool):
@@ -695,7 +676,6 @@ class LineElement(object):
     @property
     def elements(self):
         return self._elements
-    
     @elements.setter
     def elements(self, value):
         if not isinstance(value, list):
@@ -759,7 +739,6 @@ class Dictionary(object):
     @property
     def structure(self):
         return self._structure
-    
     @structure.setter
     def structure(self, value):
         if not isinstance(value, (OrderedDict, str)):
@@ -772,7 +751,6 @@ class Dictionary(object):
     @property
     def hspace(self):
         return self._hspace
-    
     @hspace.setter
     def hspace(self, value):
         if not isinstance(value, int):
@@ -782,7 +760,6 @@ class Dictionary(object):
     @property
     def vspace(self):
         return self._vspace
-    
     @vspace.setter
     def vspace(self, value):
         if not isinstance(value, int):
@@ -792,7 +769,6 @@ class Dictionary(object):
     @property
     def text_params(self):
         return self._text_params
-    
     @text_params.setter
     def text_params(self, value):
         if not isinstance(value, dict):
@@ -802,7 +778,6 @@ class Dictionary(object):
     @property
     def field_params(self):
         return self._field_params
-    
     @field_params.setter
     def field_params(self, value):
         if not isinstance(value, dict):
@@ -812,7 +787,6 @@ class Dictionary(object):
     @property
     def content_params(self):
         return self._content_params
-    
     @content_params.setter
     def content_params(self, value):
         if not isinstance(value, dict):
@@ -822,7 +796,6 @@ class Dictionary(object):
     @property
     def height(self):
         return self._height
-    
     @height.setter
     def height(self, value):
         if not isinstance(value, int):
@@ -834,7 +807,6 @@ class Dictionary(object):
     @property
     def width(self):
         return self._width
-    
     @width.setter
     def width(self, value):
         if not isinstance(value, int):

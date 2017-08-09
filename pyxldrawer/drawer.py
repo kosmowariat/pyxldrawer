@@ -38,7 +38,6 @@ class Drawer(object):
         """x coordinate
         """
         return self._x
-    
     @x.setter
     def x(self, value):
         if not isinstance(value, int):
@@ -52,7 +51,6 @@ class Drawer(object):
         """y coordinate
         """
         return self._y
-    
     @y.setter
     def y(self, value):
         if not isinstance(value, int):
@@ -66,7 +64,6 @@ class Drawer(object):
         """Drawer's worksheet
         """
         return self._ws
-    
     @ws.setter
     def ws(self, value):
         if not isinstance(value, xlsxwriter.worksheet.Worksheet):
@@ -78,7 +75,6 @@ class Drawer(object):
         """Drawer's workbook
         """
         return self._wb
-    
     @wb.setter
     def wb(self, value):
         if not isinstance(value, xlsxwriter.workbook.Workbook):
@@ -174,7 +170,7 @@ class Drawer(object):
         """
         self.checkpoints[name] = (self.x, self.y)
     
-    def reset(self, checkpoint = None, x = 0, y = 0, change_x = True, change_y = True):
+    def reset(self, checkpoint = None, x = 0, y = 0):
         """Reset Drawer position
         
         If checkpoint name (or index) is provided, then the Drawer is reset to the checkpoint.
@@ -190,20 +186,20 @@ class Drawer(object):
         self.prev_y.append(self.y)
         
         if isinstance(checkpoint, str):
-            if change_x:
+            if x is not None:
                 self.x = self.checkpoints[checkpoint][0]
-            if change_y:
+            if y is not None:
                 self.y = self.checkpoints[checkpoint][1]
         elif isinstance(checkpoint, int):
             cp = self.checkpoints[list(self.checkpoints.keys()[checkpoint])]
-            if change_x:
+            if x is not None:
                 self.x = cp[0]
-            if change_y:
+            if y is not None:
                 self.y = cp[1]
         else:
-            if change_x:
+            if x is not None:
                 self.x = x
-            if change_y:
+            if y is not None:
                 self.y = y
         
     def fallback(self, n):
