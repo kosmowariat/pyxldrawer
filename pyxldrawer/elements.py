@@ -729,9 +729,9 @@ class Dictionary(object):
         structure (OrderedDict/str): definition of the structure of a Dictionary (key => value) or a path to the .yaml config file
         hspace (int): width of the horizontal space between key column and value column
         vspace (int): default vertical spacing between fields
-        text_params (dict): key and values to be interpolated in text
         field_params (dict): default set of params passed to the HeaderElement constructor (field column) as **kwargs
         content_params (dict): default set of params passed to the HeaderElement constructor (content column) as **kwargs
+        context (dict): additional context for evaluation of field and content values
     """
     
     # -------------------------------------------------------------------------
@@ -767,15 +767,6 @@ class Dictionary(object):
         self._vspace = value
     
     @property
-    def text_params(self):
-        return self._text_params
-    @text_params.setter
-    def text_params(self, value):
-        if not isinstance(value, dict):
-            raise TypeError('text_params has to be a dict.')
-        self._text_params = value
-    
-    @property
     def field_params(self):
         return self._field_params
     @field_params.setter
@@ -792,6 +783,15 @@ class Dictionary(object):
         if not isinstance(value, dict):
             raise TypeError('content_params has to be a dict.')
         self._content_params = value
+    
+    @property
+    def context(self):
+        return self._context
+    @context.setter
+    def context(self, value):
+        if not isinstance(value, dict):
+            raise TypeError('context has to be a dict.')
+        self._context = value
     
     @property
     def height(self):
@@ -817,18 +817,18 @@ class Dictionary(object):
     
     # -------------------------------------------------------------------------
     
-    def __init__(self, structure, hspace = 1, vspace = 0, text_params = {},
-                 field_params = {}, content_params = {}):
+    def __init__(self, structure, hspace = 1, vspace = 0,
+                 field_params = {}, content_params = {}, context = None):
         """Constructor method
         """
         self.structure = structure
         self.hspace = hspace
         self.vspace = vspace
-        self.text_params = text_params
         self.field_params = field_params
         if content_params.get('col_width') is None:
             content_params['col_width'] = None
         self.content_params = content_params
+        self.context = context
         
         # Determine height and width ---
         height = 0
@@ -850,14 +850,6 @@ class Dictionary(object):
                 height += ch
         self.height = height
         self.width = width
-    
-    def interpolate_string(self, s):
-        """Interpolate a string using text_params
-        
-        Args:
-            s (str): a string
-        """
-        return s.format(f = self.text_params)
     
     def load_config(self, path = None):
         """Loads config from a config.yaml file
@@ -905,6 +897,15 @@ class Dictionary(object):
         for key, value in additional_style.items():
             merged_style[key] = value
         return merged_style
+    
+    def process_value(self, x):
+        """Evaluate string agains a context
+        """
+        if isinstance(x, str) and re.match('^@eval@', x):
+            x = re.sub('^@eval@', '', x)
+            return eval(x, None, self.context)
+        else:
+            return x
 
     def draw(self, x, y, ws, wb):
         """Draw Dictionary in a worksheet
@@ -919,7 +920,7 @@ class Dictionary(object):
         for field, data in self.structure.items():
             field_params = self._merge_styles(self.field_params, data.get('field_params', {}))
             content_params = self._merge_styles(self.content_params, data.get('content_params', {}))
-            field_value = self.interpolate_string(field)
+            field_value = self.process_value(field)
             vspace = data.get('vspace', self.vspace)
             Field = HeaderElement(field_value, **field_params)
             Field.draw(x, y, ws, wb)
@@ -929,11 +930,7 @@ class Dictionary(object):
             elif content is None:
                 content = ['']
             for value in content:
-                if isinstance(value, str):
-                    if re.match('^@@', value):
-                        value = self.text_params[re.sub('^@@', '', value)]
-                    else:
-                        value = self.interpolate_string(value)
+                value = self.process_value(value)
                 Content = HeaderElement(value, **content_params)
                 Content.draw(x, y  + Field.width + self.hspace, ws, wb)
                 x += Content.height
