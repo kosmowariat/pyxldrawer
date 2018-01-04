@@ -1,0 +1,4 @@
+pandas==0.20.3
+setuptools==36.4.0
+xlsxwriter==1.0.2
+PyYAML==3.12
